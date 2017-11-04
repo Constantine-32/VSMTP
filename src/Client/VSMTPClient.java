@@ -7,6 +7,16 @@ import java.util.Scanner;
 public class VSMTPClient {
   private static Scanner keyboard = new Scanner(System.in);
 
+  private static void mainMenu() {
+    System.out.println("Avaliable options:");
+    System.out.println("\t1. Register your account.");
+    System.out.println("\t2. Delete your account.");
+    System.out.println("\t3. Send a message.");
+    System.out.println("\t4. Read pending messages.");
+    System.out.println("\t5. Exit.");
+    System.out.println("Choose an option:");
+  }
+
   private static int getOption(int options) {
     int option = -1;
     boolean valid = false;
@@ -15,9 +25,9 @@ public class VSMTPClient {
       try {
         option = Integer.parseInt(keyboard.nextLine());
         if (1 <= option && option <= options) valid = true;
-        else System.out.println("Opcio no valida!");
+        else System.out.println("Invalid option!");
       } catch (NumberFormatException e) {
-        System.out.println("Opcio no valida!");
+        System.out.println("Invalid option!");
       }
     }
 
@@ -25,9 +35,37 @@ public class VSMTPClient {
   }
 
   public static void main(String[] args) throws Exception {
+    int option;
+    String sendData = "";
     Socket clientSocket = new Socket("localhost", 1234);
     DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-    outToServer.writeBytes("Hello World!");
+
+    mainMenu();
+    while ((option = getOption(5)) != 5) {
+      switch (option) {
+      case 1:
+        sendData = "R:";
+        System.out.println("Type your username:");
+        sendData += keyboard.nextLine()+"\n";
+        break;
+      case 2:
+        sendData = "D\n";
+        break;
+      case 3:
+        sendData = "S:";
+        System.out.println("Type the recipient username:");
+        sendData += keyboard.nextLine()+":";
+        System.out.println("Type your message:");
+        sendData += keyboard.nextLine()+"\n";
+        break;
+      case 4:
+        sendData = "M\n";
+        break;
+      }
+      outToServer.writeBytes(sendData);
+      mainMenu();
+    }
+
     clientSocket.close();
   }
 }
