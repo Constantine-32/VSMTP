@@ -1,7 +1,7 @@
 package Client;
 
-import java.io.DataOutputStream;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.util.Scanner;
 
 public class VSMTPClient {
@@ -47,23 +47,23 @@ public class VSMTPClient {
       case 1:
         sendData = "R:";
         System.out.println("Type your username:");
-        sendData += keyboard.nextLine()+"\n";
+        sendData += keyboard.nextLine();
         break;
       case 2:
-        sendData = "D\n";
+        sendData = "D";
         break;
       case 3:
         sendData = "S:";
         System.out.println("Type the recipient username:");
         sendData += keyboard.nextLine()+":";
         System.out.println("Type your message:");
-        sendData += keyboard.nextLine()+"\n";
+        sendData += keyboard.nextLine();
         break;
       case 4:
-        sendData = "M\n";
+        sendData = "M";
         break;
       }
-      outToServer.writeBytes(sendData);
+      outToServer.writeBytes(sendData + '\n');
       System.out.println("Server response: "+inFromServer.nextLine());
       mainMenu();
     }

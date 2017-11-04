@@ -1,8 +1,7 @@
 package Server;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.util.Scanner;
 
 public class VSMTPThread extends Thread {
@@ -10,19 +9,21 @@ public class VSMTPThread extends Thread {
   private int threadId;
   private Socket socket;
 
-  public VSMTPThread(Socket socket) {
+  VSMTPThread(Socket socket) {
     this.socket = socket;
     threadId = nextId++;
     System.out.println("Thread["+threadId+"] STARTED");
   }
 
   @Override
-  public void run() {
+  public synchronized void run() {
     try {
       Scanner inFromClient = new Scanner(socket.getInputStream());
       DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
       while (inFromClient.hasNext()) {
-        System.out.println("Thread["+threadId+"] "+inFromClient.nextLine());
+        String clientData = inFromClient.nextLine();
+        // Client Data Processing
+        System.out.println("Thread["+threadId+"] "+clientData);
         outToClient.writeBytes("OK:Default OK message\n");
       }
     } catch (IOException e) {
