@@ -37,8 +37,9 @@ public class VSMTPClient {
   public static void main(String[] args) throws Exception {
     int option;
     String sendData = "";
-    Socket clientSocket = new Socket("localhost", 1234);
-    DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+    Socket socket = new Socket("localhost", 1234);
+    DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
+    Scanner inFromServer = new Scanner(socket.getInputStream());
 
     mainMenu();
     while ((option = getOption(5)) != 5) {
@@ -63,9 +64,10 @@ public class VSMTPClient {
         break;
       }
       outToServer.writeBytes(sendData);
+      System.out.println("Server response: "+inFromServer.nextLine());
       mainMenu();
     }
 
-    clientSocket.close();
+    socket.close();
   }
 }
