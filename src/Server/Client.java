@@ -3,37 +3,17 @@ package Server;
 import java.util.LinkedList;
 
 public class Client {
-    private String ip;
-    private Integer port;
     private String name;
     private Boolean registered= false;
-    private LinkedList<Message> messages;
+    private LinkedList<Message> messages = new LinkedList<>();
 
-    public Client(String ip, Integer port, String name) {
-        this.ip = ip;
-        this.port = port;
+    public Client(String name) {
         this.name = name;
         this.registered = true;
     }
 
     public boolean addMessage(Message t){
             return messages.add(t);
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
     }
 
     public String getName() {
@@ -62,5 +42,15 @@ public class Client {
 
     public LinkedList<Message> getAllMessages(){
         return messages;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "name='" + name + '\'' +
+                ", registered=" + registered +
+                ", messages=" + messages +
+                '}';
     }
 }

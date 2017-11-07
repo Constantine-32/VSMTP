@@ -56,6 +56,8 @@ public class VSMTPClient {
         sendData = "S:";
         System.out.println("Type the recipient username:");
         sendData += keyboard.nextLine()+":";
+        System.out.println("Type the subject:");
+        sendData += keyboard.nextLine()+":";
         System.out.println("Type your message:");
         sendData += keyboard.nextLine();
         break;

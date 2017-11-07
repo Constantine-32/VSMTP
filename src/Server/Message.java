@@ -1,6 +1,8 @@
 package Server;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable{
     private String from;
     private String subject;
     private String text;
@@ -22,4 +24,13 @@ public class Message {
         this.read = true;
     }
 
+    @Override
+    public String toString() {
+        return "Message{" +
+                "from='" + from + '\'' +
+                ", subject='" + subject + '\'' +
+                ", text='" + text + '\'' +
+                ", read=" + read +
+                '}';
+    }
 }
