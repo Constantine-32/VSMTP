@@ -2,9 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class VSMTPThread extends Thread {
   private static int nextId = 1;
@@ -48,7 +46,7 @@ public class VSMTPThread extends Thread {
     case "D":
       response = unregister();
       break;
-    case "E":
+    case "S":
       response = send(data);
       break;
     case "G":
@@ -67,26 +65,33 @@ public class VSMTPThread extends Thread {
 
   private String register(Scanner data) {
     client = data.next();
-    userTable.put(client, new Client(client));
-//    System.out.println(userTable);
-    return "OK:Register succesful";
+    if (userTable.containsKey(client)) return "KO:Username already exists";
+    else {
+      userTable.put(client, new Client(client));
+      return "OK:Registered successfully";
+    }
   }
 
   private String unregister() {
     userTable.get(client).setRegistered(false);
-    return "OK:Unregistered succesful";
+    return "OK:Unregistered successfully";
   }
 
   private String send(Scanner data) {
     String recipient = data.next();
     String subject = data.next();
     String message = data.next();
-    userTable.get(recipient).addMessage(new Message(client, subject, message));
-//    System.out.println(recipient);
-    return "OK:Message send";
+    if (userTable.containsKey(recipient)) {
+      userTable.get(recipient).addMessage(new Message(client, subject, message));
+      return "OK:Message sent";
+    } else return "KO:Message NOT sent, unknown recipient";
   }
 
   private String readMessages() {
-    return userTable.get(client).getUnreadMessages().toString();
+    List<Message> result = userTable.get(client).getUnreadMessages();
+    if (result.isEmpty()) return "No new messages";
+    for (Message m : result) m.read();
+    return result.toString();
+
   }
 }

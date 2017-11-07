@@ -1,6 +1,8 @@
 package Server;
 
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.*;
 
 public class Client {
   private String name;
@@ -29,15 +31,13 @@ public class Client {
     this.registered = registered;
   }
 
-  public LinkedList<Message> getUnreadMessages() {
-    LinkedList<Message> result = new LinkedList<>();
-    for (Message t : messageList) {
-      if (!t.isRead()) result.add(t);
-    }
+  public List<Message> getUnreadMessages() {
+    List<Message> result;
+    result= messageList.stream().filter(m -> !m.isRead()).collect(Collectors.toList());
     return result;
   }
 
-  public LinkedList<Message> getAllMessages() {
+  public List<Message> getAllMessages() {
     return messageList;
   }
 

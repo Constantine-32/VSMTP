@@ -27,7 +27,6 @@ public class Message {
         "from='" + from + '\'' +
         ", subject='" + subject + '\'' +
         ", text='" + text + '\'' +
-        ", read=" + read +
         '}';
   }
 }

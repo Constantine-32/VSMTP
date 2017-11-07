@@ -8,7 +8,7 @@ public class VSMTPClient {
   private static Scanner keyboard = new Scanner(System.in);
 
   private static void mainMenu() {
-    System.out.println("Avaliable options:");
+    System.out.println("Available options:");
     System.out.println("\t1. Register your account.");
     System.out.println("\t2. Delete your account.");
     System.out.println("\t3. Send a message.");
