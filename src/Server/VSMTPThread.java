@@ -22,6 +22,7 @@ public class VSMTPThread extends Thread {
       DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
       while (inFromClient.hasNext()) {
         String clientData = inFromClient.nextLine();
+
         // Client Data Processing
         System.out.println("Thread["+threadId+"] "+clientData);
         outToClient.writeBytes("OK:Default OK message\n");
