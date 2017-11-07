@@ -26,6 +26,7 @@ public class VSMTPThread extends Thread {
         System.out.println("Thread["+threadId+"] "+clientData);
         outToClient.writeBytes("OK:Default OK message\n");
       }
+      socket.close();
     } catch (IOException e) {
       System.out.println(e.toString());
     }
