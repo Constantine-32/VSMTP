@@ -18,26 +18,36 @@ public class VSMTPClient {
   }
 
   private static int getOption(int options) {
-    int option = -1;
-    boolean valid = false;
-
-    while (!valid) {
+    int option;
+    do {
       try {
         option = Integer.parseInt(keyboard.nextLine());
-        if (1 <= option && option <= options) valid = true;
+        if (1 <= option && option <= options) return option;
         else System.out.println("Invalid option!");
       } catch (NumberFormatException e) {
         System.out.println("Invalid option!");
       }
-    }
+    } while (true);
+  }
 
-    return option;
+  private static String getString(String regex) {
+    String string;
+    do {
+      if ((string = keyboard.nextLine()).matches(regex)) return string;
+      else System.out.println("Invalid String!");
+    } while (true);
   }
 
   public static void main(String[] args) throws Exception {
     int option;
     String sendData = "";
-    Socket socket = new Socket("localhost", 1234);
+    Socket socket;
+    try {
+      socket = new Socket("localhost", 1234);
+    } catch (IOException e) {
+      System.out.println("Couldn't connect to the server: " + e.getMessage());
+      return;
+    }
     DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
     Scanner inFromServer = new Scanner(socket.getInputStream());
 
@@ -47,7 +57,7 @@ public class VSMTPClient {
       case 1:
         sendData = "R:";
         System.out.println("Type your username:");
-        sendData += keyboard.nextLine();
+        sendData += getString("[0-9a-zA-Z]{4,20}");
         break;
       case 2:
         sendData = "D";
@@ -55,18 +65,18 @@ public class VSMTPClient {
       case 3:
         sendData = "S:";
         System.out.println("Type the recipient username:");
-        sendData += keyboard.nextLine()+":";
+        sendData += getString("[0-9a-zA-Z]{4,20}") + ":";
         System.out.println("Type the subject:");
-        sendData += keyboard.nextLine()+":";
+        sendData += getString("[^:]{1,255}") + ":";
         System.out.println("Type your message:");
-        sendData += keyboard.nextLine();
+        sendData += getString("[^:]{1,3000}");
         break;
       case 4:
         sendData = "M";
         break;
       }
       outToServer.writeBytes(sendData + '\n');
-      System.out.println("Server response: "+inFromServer.nextLine());
+      System.out.println("Server response: " + inFromServer.nextLine());
       mainMenu();
     }
 
