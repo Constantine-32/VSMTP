@@ -49,11 +49,11 @@ public class VSMTPThread extends Thread {
     case "S":
       response = send(data);
       break;
-    case "G":
-      //createGroup(data);
-      break;
     case "M":
       response = readMessages();
+      break;
+    case "G":
+      //createGroup(data);
       break;
     case "J":
       //addToGroup(data);

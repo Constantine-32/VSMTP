@@ -13,7 +13,9 @@ public class VSMTPClient {
     System.out.println("\t2. Delete your account.");
     System.out.println("\t3. Send a message.");
     System.out.println("\t4. Read pending messages.");
-    System.out.println("\t5. Exit.");
+    System.out.println("\t5. Create a group.");
+    System.out.println("\t6. Join a group.");
+    System.out.println("\t7. Exit.");
     System.out.println("Choose an option:");
   }
 
@@ -52,27 +54,37 @@ public class VSMTPClient {
     Scanner inFromServer = new Scanner(socket.getInputStream());
 
     mainMenu();
-    while ((option = getOption(5)) != 5) {
+    while ((option = getOption(7)) != 7) {
       switch (option) {
       case 1:
-        sendData = "R:";
+        sendData = "R";
         System.out.println("Type your username:");
-        sendData += getString("[0-9a-zA-Z]{4,20}");
+        sendData += ":" + getString("[0-9a-zA-Z]{4,20}");
         break;
       case 2:
         sendData = "D";
         break;
       case 3:
-        sendData = "S:";
+        sendData = "S";
         System.out.println("Type the recipient username:");
-        sendData += getString("[0-9a-zA-Z]{4,20}") + ":";
+        sendData += ":" + getString("[0-9a-zA-Z]{4,20}");
         System.out.println("Type the subject:");
-        sendData += getString("[^:]{1,255}") + ":";
+        sendData += ":" + getString("[^:]{1,255}");
         System.out.println("Type your message:");
-        sendData += getString("[^:]{1,3000}");
+        sendData += ":" + getString("[^:]{1,3000}");
         break;
       case 4:
         sendData = "M";
+        break;
+      case 5:
+        sendData = "G";
+        System.out.println("Type the group name:");
+        sendData += ":" + getString("[0-9a-zA-Z]{4,20}");
+        break;
+      case 6:
+        sendData = "J";
+        System.out.println("Type the group name:");
+        sendData += ":" + getString("[0-9a-zA-Z]{4,20}");
         break;
       }
       outToServer.writeBytes(sendData + '\n');
