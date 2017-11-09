@@ -25,9 +25,9 @@ public class VSMTPThread extends Thread {
       DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
       while (inFromClient.hasNext()) {
         String clientData = inFromClient.nextLine();
-        // Client Data Processing
         System.out.println("Thread[" + threadId + "] " + clientData);
-        outToClient.writeBytes(processRequest(clientData) + "\n");
+        String response = processRequest(clientData);
+        outToClient.writeBytes(response + "\n");
       }
       socket.close();
     } catch (IOException e) {
@@ -38,38 +38,22 @@ public class VSMTPThread extends Thread {
 
   private String processRequest(String clientData) {
     Scanner data = new Scanner(clientData).useDelimiter(":");
-    String response = "";
     switch (data.next()) {
-    case "R":
-      response = register(data);
-      break;
-    case "D":
-      response = unregister();
-      break;
-    case "S":
-      response = send(data);
-      break;
-    case "M":
-      response = readMessages();
-      break;
-    case "G":
-      //createGroup(data);
-      break;
-    case "J":
-      //addToGroup(data);
-      break;
-    default:
+    case "R": return register(data);
+    case "D": return unregister();
+    case "S": return send(data);
+    case "M": return readMessages();
+    case "G": return createGroup(data);
+    case "J": return joinGroup(data);
+    default: return "KO:Unknown code";
     }
-    return response;
   }
 
   private String register(Scanner data) {
     client = data.next();
     if (userTable.containsKey(client)) return "KO:Username already exists";
-    else {
-      userTable.put(client, new Client(client));
-      return "OK:Registered successfully";
-    }
+    userTable.put(client, new Client(client));
+    return "OK:Registered successfully";
   }
 
   private String unregister() {
@@ -89,9 +73,16 @@ public class VSMTPThread extends Thread {
 
   private String readMessages() {
     List<Message> result = userTable.get(client).getUnreadMessages();
-    if (result.isEmpty()) return "No new messages";
+    if (result.isEmpty()) return "KO:No new messages";
     for (Message m : result) m.read();
-    return result.toString();
+    return "OK:"+result.toString();
+  }
 
+  private String createGroup(Scanner data) {
+    return "KO:Not implemented";
+  }
+
+  private String joinGroup(Scanner data) {
+    return "KO:Not implemented";
   }
 }
