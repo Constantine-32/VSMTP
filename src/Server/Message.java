@@ -21,6 +21,10 @@ public class Message {
     read = true;
   }
 
+  public String getMessage() {
+    return from+':'+subject+':'+text;
+  }
+
   @Override
   public String toString() {
     return "Message{" +

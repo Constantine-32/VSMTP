@@ -24,14 +24,15 @@ public class VSMTPThread extends Thread {
       Scanner inFromClient = new Scanner(socket.getInputStream());
       DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
       while (inFromClient.hasNext()) {
-        String clientData = inFromClient.nextLine();
-        System.out.println("Thread[" + threadId + "] " + clientData);
-        String response = processRequest(clientData);
-        outToClient.writeBytes(response + "\n");
+        String fromClient = inFromClient.nextLine();
+        System.out.println("Thread[" + threadId + "] From Client: \"" + fromClient + '\"');
+        String toClient = processRequest(fromClient);
+        outToClient.writeBytes(toClient + "\n");
+        System.out.println("Thread[" + threadId + "] To Client: \"" + toClient + '\"');
       }
       socket.close();
     } catch (IOException e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
     }
     System.out.println("Thread[" + threadId + "] CLOSED");
   }
@@ -74,8 +75,12 @@ public class VSMTPThread extends Thread {
   private String readMessages() {
     List<Message> result = userTable.get(client).getUnreadMessages();
     if (result.isEmpty()) return "KO:No new messages";
-    for (Message m : result) m.read();
-    return "OK:"+result.toString();
+    StringBuilder sb = new StringBuilder().append("OK");
+    for (Message m : result) {
+      sb.append(':').append(m.getMessage());
+      m.read();
+    }
+    return sb.toString();
   }
 
   private String createGroup(Scanner data) {
