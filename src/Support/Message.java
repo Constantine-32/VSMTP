@@ -1,4 +1,4 @@
-package Server;
+package Support;
 
 public class Message {
   private String from;
@@ -27,10 +27,6 @@ public class Message {
 
   @Override
   public String toString() {
-    return "Message{" +
-        "from='" + from + '\'' +
-        ", subject='" + subject + '\'' +
-        ", text='" + text + '\'' +
-        '}';
+    return "From: " + from + "\nSubject: " + subject + "\nMessage: " + text;
   }
 }

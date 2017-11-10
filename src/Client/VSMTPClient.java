@@ -1,8 +1,10 @@
 package Client;
 
+import Support.Message;
+
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import java.util.*;
 
 public class VSMTPClient {
   private static Scanner keyboard = new Scanner(System.in);
@@ -93,12 +95,14 @@ public class VSMTPClient {
       if (data.next().equals("KO"))
         System.out.println("Error: " + data.next());
       else {
-        int count = 1;
+        LinkedList<Message> messageList = new LinkedList<>();
         while (data.hasNext()) {
-          System.out.println("Message " + count++);
-          System.out.println("\tFrom: " + data.next());
-          System.out.println("\tSubject: " + data.next());
-          System.out.println("\tMessage: " + data.next());
+          messageList.add(new Message(data.next(), data.next(), data.next()));
+        }
+        int count = 1;
+        for (Message message : messageList) {
+          System.out.println("Message " + (count++) + " out of " + messageList.size());
+          System.out.println(message.toString());
         }
       }
       break;
