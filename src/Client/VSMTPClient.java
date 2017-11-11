@@ -177,6 +177,7 @@ public class VSMTPClient {
           }
         }
       }
+
     } catch (IOException e) {
       System.out.println("Server connection error: " + e.getMessage());
     }
