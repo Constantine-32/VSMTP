@@ -1,10 +1,10 @@
 package Support;
 
-public class Message {
+public class Message implements Cloneable {
   private String from;
   private String subject;
   private String text;
-  private Boolean read;
+  private boolean read;
 
   public Message(String from, String subject, String text) {
     this.from = from;
@@ -28,5 +28,10 @@ public class Message {
   @Override
   public String toString() {
     return "From: " + from + "\nSubject: " + subject + "\nMessage: " + text;
+  }
+
+  @Override
+  public Message clone() {
+    return new Message(from, subject, text);
   }
 }

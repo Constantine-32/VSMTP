@@ -10,7 +10,9 @@ public class VSMTPThread extends Thread {
   private static int nextId = 1;
   private int threadId;
 
-  private static Map<String, Client> userTable = new HashMap<>();
+  private static Map<String, Client> clientTable = new HashMap<>();
+  private static Map<String, Group> groupTable = new HashMap<>();
+
   private Socket socket;
   private String client;
 
@@ -45,6 +47,7 @@ public class VSMTPThread extends Thread {
     case "R": return register(data);
     case "D": return unregister();
     case "S": return send(data);
+    case "T": return sendGroup(data);
     case "M": return readMessages();
     case "G": return createGroup(data);
     case "J": return joinGroup(data);
@@ -54,13 +57,13 @@ public class VSMTPThread extends Thread {
 
   private String register(Scanner data) {
     client = data.next();
-    if (userTable.containsKey(client)) return "KO:Username already exists";
-    userTable.put(client, new Client(client));
+    if (clientTable.containsKey(client)) return "KO:Username already exists";
+    clientTable.put(client, new Client(client));
     return "OK:Registered successfully";
   }
 
   private String unregister() {
-    userTable.get(client).setRegistered(false);
+    clientTable.get(client).setActive(false);
     return "OK:Unregistered successfully";
   }
 
@@ -68,14 +71,24 @@ public class VSMTPThread extends Thread {
     String recipient = data.next();
     String subject = data.next();
     String message = data.next();
-    if (userTable.containsKey(recipient)) {
-      userTable.get(recipient).addMessage(new Message(client, subject, message));
-      return "OK:Message sent";
+    if (clientTable.containsKey(recipient)) {
+      clientTable.get(recipient).addMessage(new Message(client, subject, message));
+      return "OK:Message sent successfully";
     } else return "KO:Message NOT sent, unknown recipient";
   }
 
+  private String sendGroup(Scanner data) {
+    String group = data.next();
+    String subject = data.next();
+    String message = data.next();
+    if (!groupTable.containsKey(group)) return "KO:Group doesn't exists";
+    if (!groupTable.get(group).hasClient(client)) return "KO:You aren't in this group";
+    groupTable.get(group).addMessage(new Message(client, subject, message));
+    return "OK:Message sent successfully";
+  }
+
   private String readMessages() {
-    List<Message> result = userTable.get(client).getUnreadMessages();
+    List<Message> result = clientTable.get(client).getUnreadMessages();
     if (result.isEmpty()) return "KO:No new messages";
     StringBuilder sb = new StringBuilder().append("OK");
     for (Message m : result) {
@@ -86,10 +99,16 @@ public class VSMTPThread extends Thread {
   }
 
   private String createGroup(Scanner data) {
-    return "KO:Not implemented";
+    String groupName = data.next();
+    if (groupTable.containsKey(groupName)) return "KO:Group name already exists";
+    groupTable.put(groupName, new Group(groupName));
+    return "OK:Group created";
   }
 
   private String joinGroup(Scanner data) {
-    return "KO:Not implemented";
+    String groupName = data.next();
+    if (!groupTable.containsKey(groupName)) return "KO:Group doesn't exists";
+    groupTable.get(groupName).addClient(clientTable.get(client));
+    return "OK:Joined the group successfully";
   }
 }

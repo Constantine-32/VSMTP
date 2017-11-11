@@ -5,45 +5,45 @@ import java.util.stream.*;
 
 public class Client {
   private String name;
-  private Boolean registered;
-  private LinkedList<Message> messageList;
+  private LinkedList<Message> messages;
+  private boolean active;
 
   public Client(String name) {
     this.name = name;
-    registered = true;
-    messageList = new LinkedList<>();
+    messages = new LinkedList<>();
+    active = true;
   }
 
   public void addMessage(Message message) {
-    messageList.add(message);
+    messages.add(message);
   }
 
   public String getName() {
     return name;
   }
 
-  public Boolean isRegistered() {
-    return registered;
+  public boolean isActive() {
+    return active;
   }
 
-  public void setRegistered(Boolean registered) {
-    this.registered = registered;
+  public void setActive(boolean active) {
+    this.active = active;
   }
 
   public List<Message> getUnreadMessages() {
-    return messageList.stream().filter(m -> !m.isRead()).collect(Collectors.toList());
+    return messages.stream().filter(m -> !m.isRead()).collect(Collectors.toList());
   }
 
   public List<Message> getAllMessages() {
-    return messageList;
+    return messages;
   }
 
   @Override
   public String toString() {
     return "Client{" +
         "name='" + name + '\'' +
-        ", registered=" + registered +
-        ", messageList=" + messageList +
+        ", active=" + active +
+        ", messages=" + messages +
         '}';
   }
 }

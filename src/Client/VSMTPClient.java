@@ -13,11 +13,12 @@ public class VSMTPClient {
     System.out.println("Available options:");
     System.out.println("\t1. Register your account.");
     System.out.println("\t2. Delete your account.");
-    System.out.println("\t3. Send a message.");
-    System.out.println("\t4. Read pending messages.");
-    System.out.println("\t5. Create a group.");
-    System.out.println("\t6. Join a group.");
-    System.out.println("\t7. Exit.");
+    System.out.println("\t3. Send a message to a client.");
+    System.out.println("\t4. Send a message to a group.");
+    System.out.println("\t5. Read pending messages.");
+    System.out.println("\t6. Create a group.");
+    System.out.println("\t7. Join a group.");
+    System.out.println("\t8. Exit.");
     System.out.println("Choose an option:");
   }
 
@@ -43,6 +44,7 @@ public class VSMTPClient {
   }
 
   private static String getSendData(int option) {
+    String sendData;
     switch (option) {
     case 1:
       System.out.println("Type your username:");
@@ -50,19 +52,24 @@ public class VSMTPClient {
     case 2:
       return "D";
     case 3:
-      String sendData = "S";
       System.out.println("Type the recipient username:");
-      sendData += ":" + getString("[0-9a-zA-Z]{4,20}");
+      sendData = "S:" + getString("[0-9a-zA-Z]{4,20}");
       System.out.println("Type the subject:");
       sendData += ":" + getString("[^:]{1,255}");
       System.out.println("Type your message:");
       return sendData + ":" + getString("[^:]{1,3000}");
     case 4:
-      return "M";
+      System.out.println("Type the group name:");
+      String groupName = getString("[0-9a-zA-Z]{4,20}");
+      sendData = "T:" + groupName + ":Group " + groupName;
+      System.out.println("Type your message:");
+      return sendData + ":" + getString("[^:]{1,3000}");
     case 5:
+      return "M";
+    case 6:
       System.out.println("Type the group name:");
       return "G:" + getString("[0-9a-zA-Z]{4,20}");
-    case 6:
+    case 7:
       System.out.println("Type the group name:");
       return "J:" + getString("[0-9a-zA-Z]{4,20}");
     default:
@@ -94,6 +101,12 @@ public class VSMTPClient {
     case 4:
       if (data.next().equals("KO"))
         System.out.println("Error: " + data.next());
+      else
+        System.out.println("Success: " + data.next());
+      break;
+    case 5:
+      if (data.next().equals("KO"))
+        System.out.println("Error: " + data.next());
       else {
         LinkedList<Message> messageList = new LinkedList<>();
         while (data.hasNext()) {
@@ -106,13 +119,13 @@ public class VSMTPClient {
         }
       }
       break;
-    case 5:
+    case 6:
       if (data.next().equals("KO"))
         System.out.println("Error: " + data.next());
       else
         System.out.println("Success: " + data.next());
       break;
-    case 6:
+    case 7:
       if (data.next().equals("KO"))
         System.out.println("Error: " + data.next());
       else
@@ -137,7 +150,7 @@ public class VSMTPClient {
     Scanner inFromServer = new Scanner(socket.getInputStream());
 
     mainMenu();
-    while ((option = getOption(7)) != 7) {
+    while ((option = getOption(7)) != 8) {
       outToServer.writeBytes(getSendData(option) + '\n');
       processResponse(inFromServer.nextLine(), option);
       mainMenu();
