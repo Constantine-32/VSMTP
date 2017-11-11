@@ -151,39 +151,34 @@ public class VSMTPClient {
   public static void main(String[] args) throws Exception {
     boolean exit = false;
     boolean loggedIn = false;
-    Socket socket;
-    try {
-      socket = new Socket("localhost", 1234);
-    } catch (IOException e) {
-      System.out.println("Couldn't connect to the server: " + e.getMessage());
-      return;
-    }
 
-    outToServer = new DataOutputStream(socket.getOutputStream());
-    inFromServer = new Scanner(socket.getInputStream());
+    try (Socket socket = new Socket("localhost", 1234)) {
+      outToServer = new DataOutputStream(socket.getOutputStream());
+      inFromServer = new Scanner(socket.getInputStream());
 
-    while (!exit) {
-      loginMenu();
-      switch (getOption(3)) {
-      case 1: loggedIn = signIn(); break;
-      case 2: loggedIn = signUp(); break;
-      case 3: exit = true;
-      }
-      while (loggedIn) {
-        mainMenu();
-        switch (getOption(8)) {
-        case 1: sendToClient(); break;
-        case 2: sendToGroup(); break;
-        case 3: readMessages(); break;
-        case 4: createGroup(); break;
-        case 5: joinGroup(); break;
-        case 6: leaveGroup(); break;
-        case 7: deleteAccount();
-        case 8: loggedIn = false;
+      while (!exit) {
+        loginMenu();
+        switch (getOption(3)) {
+        case 1: loggedIn = signIn(); break;
+        case 2: loggedIn = signUp(); break;
+        case 3: exit = true;
+        }
+        while (loggedIn) {
+          mainMenu();
+          switch (getOption(8)) {
+          case 1: sendToClient(); break;
+          case 2: sendToGroup(); break;
+          case 3: readMessages(); break;
+          case 4: createGroup(); break;
+          case 5: joinGroup(); break;
+          case 6: leaveGroup(); break;
+          case 7: deleteAccount();
+          case 8: loggedIn = false;
+          }
         }
       }
+    } catch (IOException e) {
+      System.out.println("Server connection error: " + e.getMessage());
     }
-
-    socket.close();
   }
 }
