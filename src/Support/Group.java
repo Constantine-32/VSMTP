@@ -19,6 +19,10 @@ public class Group extends Client {
     clients.add(client);
   }
 
+  public void removeClient(Client client) {
+    clients.remove(client);
+  }
+
   public boolean hasClient(String username) {
     for (Client client : clients)
       if (client.getName().equals(username)) return true;

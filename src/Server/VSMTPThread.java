@@ -14,7 +14,7 @@ public class VSMTPThread extends Thread {
   private static Map<String, Group> groupTable = new HashMap<>();
 
   private Socket socket;
-  private String client;
+  private Client client;
 
   VSMTPThread(Socket socket) {
     this.socket = socket;
@@ -44,51 +44,63 @@ public class VSMTPThread extends Thread {
   private String processRequest(String clientData) {
     Scanner data = new Scanner(clientData).useDelimiter(":");
     switch (data.next()) {
-    case "R": return register(data);
-    case "D": return unregister();
-    case "S": return send(data);
-    case "T": return sendGroup(data);
+    case "I": return singIn(data);
+    case "R": return signUp(data);
+    case "S": return sendToClient(data);
+    case "T": return sendToGroup(data);
     case "M": return readMessages();
     case "G": return createGroup(data);
     case "J": return joinGroup(data);
+    case "L": return leaveGroup(data);
+    case "D": return deleteAccount();
     default: return "KO:Unknown code";
     }
   }
 
-  private String register(Scanner data) {
-    client = data.next();
-    if (clientTable.containsKey(client)) return "KO:Username already exists";
-    clientTable.put(client, new Client(client));
-    return "OK:Registered successfully";
+  private String singIn(Scanner data) {
+    String clientName = data.next();
+    client = clientTable.get(clientName);
+    if (client == null || !client.isActive()) return "KO:User doesn't exists";
+    return "OK:Logged in successfully";
   }
 
-  private String unregister() {
-    clientTable.get(client).setActive(false);
-    return "OK:Unregistered successfully";
+  private String signUp(Scanner data) {
+    String clientName = data.next();
+    client = clientTable.get(clientName);
+    if (client == null) {
+      client = new Client(clientName);
+      clientTable.put(clientName, client);
+      return "OK:Registered successfully";
+    }
+    if (!client.isActive()) {
+      client.setActive(true);
+      return "OK:Registered successfully";
+    }
+    return "KO:Username already exists";
   }
 
-  private String send(Scanner data) {
+  private String sendToClient(Scanner data) {
     String recipient = data.next();
     String subject = data.next();
     String message = data.next();
     if (clientTable.containsKey(recipient)) {
-      clientTable.get(recipient).addMessage(new Message(client, subject, message));
+      clientTable.get(recipient).addMessage(new Message(client.getName(), subject, message));
       return "OK:Message sent successfully";
     } else return "KO:Message NOT sent, unknown recipient";
   }
 
-  private String sendGroup(Scanner data) {
+  private String sendToGroup(Scanner data) {
     String group = data.next();
     String subject = data.next();
     String message = data.next();
     if (!groupTable.containsKey(group)) return "KO:Group doesn't exists";
-    if (!groupTable.get(group).hasClient(client)) return "KO:You aren't in this group";
-    groupTable.get(group).addMessage(new Message(client, subject, message));
+    if (!groupTable.get(group).hasClient(client.getName())) return "KO:You aren't in this group";
+    groupTable.get(group).addMessage(new Message(client.getName(), subject, message));
     return "OK:Message sent successfully";
   }
 
   private String readMessages() {
-    List<Message> result = clientTable.get(client).getUnreadMessages();
+    List<Message> result = client.getUnreadMessages();
     if (result.isEmpty()) return "KO:No new messages";
     StringBuilder sb = new StringBuilder().append("OK");
     for (Message m : result) {
@@ -108,7 +120,20 @@ public class VSMTPThread extends Thread {
   private String joinGroup(Scanner data) {
     String groupName = data.next();
     if (!groupTable.containsKey(groupName)) return "KO:Group doesn't exists";
-    groupTable.get(groupName).addClient(clientTable.get(client));
+    groupTable.get(groupName).addClient(client);
     return "OK:Joined the group successfully";
+  }
+
+  private String leaveGroup(Scanner data) {
+    String groupName = data.next();
+    if (!groupTable.containsKey(groupName)) return "KO:Group doesn't exists";
+    if (!groupTable.get(groupName).hasClient(client.getName())) return "KO:You aren't in that group";
+    groupTable.get(groupName).removeClient(client);
+    return "OK:Leaved the group successfully";
+  }
+
+  private String deleteAccount() {
+    client.setActive(false);
+    return "OK:Unregistered successfully";
   }
 }

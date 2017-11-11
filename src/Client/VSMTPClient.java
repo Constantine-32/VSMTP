@@ -1,6 +1,6 @@
 package Client;
 
-import Support.Message;
+import Support.*;
 
 import java.io.*;
 import java.net.*;
@@ -8,17 +8,27 @@ import java.util.*;
 
 public class VSMTPClient {
   private static Scanner keyboard = new Scanner(System.in);
+  private static DataOutputStream outToServer;
+  private static Scanner inFromServer;
+
+  private static void loginMenu() {
+    System.out.println("Available options:");
+    System.out.println("\t1. Sign In.");
+    System.out.println("\t2. Sign Up.");
+    System.out.println("\t3. Exit.");
+    System.out.println("Choose an option:");
+  }
 
   private static void mainMenu() {
     System.out.println("Available options:");
-    System.out.println("\t1. Register your account.");
-    System.out.println("\t2. Delete your account.");
-    System.out.println("\t3. Send a message to a client.");
-    System.out.println("\t4. Send a message to a group.");
-    System.out.println("\t5. Read pending messages.");
-    System.out.println("\t6. Create a group.");
-    System.out.println("\t7. Join a group.");
-    System.out.println("\t8. Exit.");
+    System.out.println("\t1. Send message to a client.");
+    System.out.println("\t2. Send message to a group.");
+    System.out.println("\t3. Read pending messages.");
+    System.out.println("\t4. Create group.");
+    System.out.println("\t5. Join group.");
+    System.out.println("\t6. Leave group.");
+    System.out.println("\t7. Delete account.");
+    System.out.println("\t8. Sign out.");
     System.out.println("Choose an option:");
   }
 
@@ -43,101 +53,104 @@ public class VSMTPClient {
     } while (true);
   }
 
-  private static String getSendData(int option) {
-    String sendData;
-    switch (option) {
-    case 1:
-      System.out.println("Type your username:");
-      return "R:" + getString("[0-9a-zA-Z]{4,20}");
-    case 2:
-      return "D";
-    case 3:
-      System.out.println("Type the recipient username:");
-      sendData = "S:" + getString("[0-9a-zA-Z]{4,20}");
-      System.out.println("Type the subject:");
-      sendData += ":" + getString("[^:]{1,255}");
-      System.out.println("Type your message:");
-      return sendData + ":" + getString("[^:]{1,3000}");
-    case 4:
-      System.out.println("Type the group name:");
-      String groupName = getString("[0-9a-zA-Z]{4,20}");
-      sendData = "T:" + groupName + ":Group " + groupName;
-      System.out.println("Type your message:");
-      return sendData + ":" + getString("[^:]{1,3000}");
-    case 5:
-      return "M";
-    case 6:
-      System.out.println("Type the group name:");
-      return "G:" + getString("[0-9a-zA-Z]{4,20}");
-    case 7:
-      System.out.println("Type the group name:");
-      return "J:" + getString("[0-9a-zA-Z]{4,20}");
-    default:
-      return "";
-    }
+  private static boolean signIn() throws IOException {
+    System.out.println("Type your username:");
+    outToServer.writeBytes("I:" + getString("[0-9a-zA-Z]{4,20}") + '\n');
+    return processResponse();
   }
 
-  private static void processResponse(String response, int option) {
-    Scanner data = new Scanner(response).useDelimiter(":");
-    switch (option) {
-    case 1:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    case 2:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    case 3:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    case 4:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    case 5:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else {
-        LinkedList<Message> messageList = new LinkedList<>();
-        while (data.hasNext()) {
-          messageList.add(new Message(data.next(), data.next(), data.next()));
-        }
-        int count = 1;
-        for (Message message : messageList) {
-          System.out.println("Message " + (count++) + " out of " + messageList.size());
-          System.out.println(message.toString());
-        }
-      }
-      break;
-    case 6:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    case 7:
-      if (data.next().equals("KO"))
-        System.out.println("Error: " + data.next());
-      else
-        System.out.println("Success: " + data.next());
-      break;
-    default:
-      System.out.println("Uknown Response");
+  private static boolean signUp() throws IOException {
+    System.out.println("Type your username:");
+    outToServer.writeBytes("R:" + getString("[0-9a-zA-Z]{4,20}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean sendToClient() throws IOException {
+    String sendData;
+    System.out.println("Type the recipient username:");
+    sendData = "S:" + getString("[0-9a-zA-Z]{4,20}");
+    System.out.println("Type the subject:");
+    sendData += ":" + getString("[^:]{1,255}");
+    System.out.println("Type your message:");
+    outToServer.writeBytes(sendData + ":" + getString("[^:]{1,3000}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean sendToGroup() throws IOException {
+    String sendData;
+    System.out.println("Type the group name:");
+    String groupName = getString("[0-9a-zA-Z]{4,20}");
+    sendData = "T:" + groupName + ":Group " + groupName;
+    System.out.println("Type your message:");
+    outToServer.writeBytes(sendData + ":" + getString("[^:]{1,3000}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean readMessages() throws IOException {
+    outToServer.writeBytes("M\n");
+    return processResponseMessages();
+  }
+
+  private static boolean createGroup() throws IOException {
+    System.out.println("Type the group name:");
+    outToServer.writeBytes("G:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean joinGroup() throws IOException {
+    System.out.println("Type the group name:");
+    outToServer.writeBytes("J:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean leaveGroup() throws IOException {
+    System.out.println("Type the group name:");
+    outToServer.writeBytes("L:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
+    return processResponse();
+  }
+
+  private static boolean deleteAccount() throws IOException {
+    outToServer.writeBytes("D\n");
+    return processResponse();
+  }
+
+  private static boolean processResponse() {
+    Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
+    String result = response.next();
+    if (result.equals("OK")) {
+      System.out.println("Success: " + response.next());
+      return true;
     }
+    if (result.equals("KO")) {
+      System.out.println("Error: " + response.next());
+      return false;
+    }
+    System.out.println("Unknown Response");
+    return false;
+  }
+
+  private static boolean processResponseMessages() {
+    Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
+    String result = response.next();
+    if (result.equals("KO")) {
+      System.out.println("Error: " + response.next());
+      return false;
+    }
+    LinkedList<Message> messageList = new LinkedList<>();
+    while (response.hasNext()) {
+      messageList.add(new Message(response.next(), response.next(), response.next()));
+    }
+    int count = 1;
+    for (Message message : messageList) {
+      System.out.println("Message " + (count++) + " out of " + messageList.size());
+      System.out.println(message.toString());
+    }
+    return true;
   }
 
   public static void main(String[] args) throws Exception {
-    int option;
+    boolean exit = false;
+    boolean loggedIn = false;
     Socket socket;
     try {
       socket = new Socket("localhost", 1234);
@@ -146,14 +159,29 @@ public class VSMTPClient {
       return;
     }
 
-    DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
-    Scanner inFromServer = new Scanner(socket.getInputStream());
+    outToServer = new DataOutputStream(socket.getOutputStream());
+    inFromServer = new Scanner(socket.getInputStream());
 
-    mainMenu();
-    while ((option = getOption(7)) != 8) {
-      outToServer.writeBytes(getSendData(option) + '\n');
-      processResponse(inFromServer.nextLine(), option);
-      mainMenu();
+    while (!exit) {
+      loginMenu();
+      switch (getOption(3)) {
+      case 1: loggedIn = signIn(); break;
+      case 2: loggedIn = signUp(); break;
+      case 3: exit = true;
+      }
+      while (loggedIn) {
+        mainMenu();
+        switch (getOption(8)) {
+        case 1: sendToClient(); break;
+        case 2: sendToGroup(); break;
+        case 3: readMessages(); break;
+        case 4: createGroup(); break;
+        case 5: joinGroup(); break;
+        case 6: leaveGroup(); break;
+        case 7: deleteAccount();
+        case 8: loggedIn = false;
+        }
+      }
     }
 
     socket.close();
