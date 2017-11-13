@@ -32,89 +32,92 @@ public class VSMTPClient {
     System.out.println("Choose an option:");
   }
 
-  private static int getOption(int options) {
+  private static int getOption(int range) {
     int option;
-    do {
+    while (true) {
       try {
         option = Integer.parseInt(keyboard.nextLine());
-        if (1 <= option && option <= options) return option;
+        if (1 <= option && option <= range) return option;
         else System.out.println("Invalid option!");
       } catch (NumberFormatException e) {
         System.out.println("Invalid option!");
       }
-    } while (true);
+    }
   }
 
   private static String getString(String regex) {
     String string;
-    do {
+    while (true) {
       if ((string = keyboard.nextLine()).matches(regex)) return string;
       else System.out.println("Invalid String!");
-    } while (true);
+    }
   }
 
   private static boolean signIn() throws IOException {
     System.out.println("Type your username:");
-    outToServer.writeBytes("I:" + getString("[0-9a-zA-Z]{4,20}") + '\n');
-    return processResponse();
+    sendData(new String[]{"I", getString("[0-9a-zA-Z]{4,20}")});
+    return receiveResponse();
   }
 
   private static boolean signUp() throws IOException {
     System.out.println("Type your username:");
-    outToServer.writeBytes("R:" + getString("[0-9a-zA-Z]{4,20}") + '\n');
-    return processResponse();
+    sendData(new String[]{"R", getString("[0-9a-zA-Z]{4,20}")});
+    return receiveResponse();
   }
 
-  private static boolean sendToClient() throws IOException {
-    String sendData;
+  private static void sendToClient() throws IOException {
     System.out.println("Type the recipient username:");
-    sendData = "S:" + getString("[0-9a-zA-Z]{4,20}");
+    String recipient = getString("[0-9a-zA-Z]{4,20}");
     System.out.println("Type the subject:");
-    sendData += ":" + getString("[^:]{1,255}");
+    String subject = getString("[^:]{1,255}");
     System.out.println("Type your message:");
-    outToServer.writeBytes(sendData + ":" + getString("[^:]{1,3000}") + '\n');
-    return processResponse();
+    String message = getString("[^:]{1,3000}");
+    sendData(new String[]{"S", recipient, subject, message});
+    receiveResponse();
   }
 
-  private static boolean sendToGroup() throws IOException {
-    String sendData;
+  private static void sendToGroup() throws IOException {
     System.out.println("Type the group name:");
-    String groupName = getString("[0-9a-zA-Z]{4,20}");
-    sendData = "T:" + groupName + ":Group " + groupName;
+    String group = getString("[0-9a-zA-Z]{4,20}");
     System.out.println("Type your message:");
-    outToServer.writeBytes(sendData + ":" + getString("[^:]{1,3000}") + '\n');
-    return processResponse();
+    String message = getString("[^:]{1,3000}");
+    sendData(new String[]{"T", group, "Group " + group, message});
+    receiveResponse();
   }
 
-  private static boolean readMessages() throws IOException {
-    outToServer.writeBytes("M\n");
-    return processResponseMessages();
+  private static void readMessages() throws IOException {
+    sendData(new String[]{"M"});
+    receiveResponseMessages();
   }
 
-  private static boolean createGroup() throws IOException {
+  private static void createGroup() throws IOException {
     System.out.println("Type the group name:");
-    outToServer.writeBytes("G:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
-    return processResponse();
+    sendData(new String[]{"G", getString("[0-9a-zA-Z]{2,20}")});
+    receiveResponse();
   }
 
-  private static boolean joinGroup() throws IOException {
+  private static void joinGroup() throws IOException {
     System.out.println("Type the group name:");
-    outToServer.writeBytes("J:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
-    return processResponse();
+    sendData(new String[]{"J", getString("[0-9a-zA-Z]{2,20}")});
+    receiveResponse();
   }
 
-  private static boolean leaveGroup() throws IOException {
+  private static void leaveGroup() throws IOException {
     System.out.println("Type the group name:");
-    outToServer.writeBytes("L:" + getString("[0-9a-zA-Z]{2,20}") + '\n');
-    return processResponse();
+    sendData(new String[]{"L", getString("[0-9a-zA-Z]{2,20}")});
+    receiveResponse();
   }
 
-  private static boolean deleteAccount() throws IOException {
-    outToServer.writeBytes("D\n");
-    return processResponse();
+  private static void deleteAccount() throws IOException {
+    sendData(new String[]{"D"});
+    receiveResponse();
   }
 
-  private static boolean processResponse() {
+  private static void sendData(String[] data) throws IOException {
+    outToServer.writeBytes(String.join(":", data) + '\n');
+  }
+
+  private static boolean receiveResponse() {
     Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
     String result = response.next();
     if (result.equals("OK")) {
@@ -129,23 +132,20 @@ public class VSMTPClient {
     return false;
   }
 
-  private static boolean processResponseMessages() {
+  private static void receiveResponseMessages() {
     Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
     String result = response.next();
-    if (result.equals("KO")) {
-      System.out.println("Error: " + response.next());
-      return false;
-    }
-    LinkedList<Message> messageList = new LinkedList<>();
-    while (response.hasNext()) {
-      messageList.add(new Message(response.next(), response.next(), response.next()));
-    }
-    int count = 1;
-    for (Message message : messageList) {
-      System.out.println("Message " + (count++) + " out of " + messageList.size());
-      System.out.println(message.toString());
-    }
-    return true;
+    if (result.equals("OK")) {
+      LinkedList<Message> messageList = new LinkedList<>();
+      while (response.hasNext()) {
+        messageList.add(new Message(response.next(), response.next(), response.next()));
+      }
+      int count = 1;
+      for (Message message : messageList) {
+        System.out.println("Message " + (count++) + " out of " + messageList.size());
+        System.out.println(message.toString());
+      }
+    } else System.out.println("Error: " + response.next());
   }
 
   public static void main(String[] args) throws Exception {

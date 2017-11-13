@@ -34,10 +34,6 @@ public class Client {
     return messages.stream().filter(m -> !m.isRead()).collect(Collectors.toList());
   }
 
-  public List<Message> getAllMessages() {
-    return messages;
-  }
-
   @Override
   public String toString() {
     return "Client{" +
