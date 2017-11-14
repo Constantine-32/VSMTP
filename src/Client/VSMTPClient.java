@@ -11,6 +11,21 @@ public class VSMTPClient {
   private static DataOutputStream outToServer;
   private static Scanner inFromServer;
 
+  // String literals
+  private static String usrNameMsg = "Type your username:";
+  private static String usrNameErr = "Username must contain only alphanumeric characters and be between 3 to 20 characters long:";
+  private static String usrNameRex = "[0-9a-zA-Z]{3,20}";
+  private static String grpNameMsg = "Type the group name:";
+  private static String grpNameErr = "Groupname must contain only alphanumeric characters and be between 3 to 20 characters long:";
+  private static String grpNameRex = "[0-9a-zA-Z]{3,20}";
+  private static String subjectMsg = "Type the subject:";
+  private static String subjectErr = "Subject cannot contain character ':' and must be between 1 to 255 characters long:";
+  private static String subjectRex = "[^:]{1,255}";
+  private static String messageMsg = "Type your message:";
+  private static String messageErr = "Message cannot contain character ':' and must be between 1 to 3000 characters long:";
+  private static String messageRex = "[^:]{1,3000}";
+  private static String recipntMsg = "Type the recipient username:";
+
   private static void loginMenu() {
     System.out.println("Available options:");
     System.out.println("\t1. Sign In.");
@@ -32,6 +47,7 @@ public class VSMTPClient {
     System.out.println("Choose an option:");
   }
 
+  // Returns an integer from the user input between 1 and the specified range
   private static int getOption(int range) {
     int option;
     while (true) {
@@ -45,51 +61,39 @@ public class VSMTPClient {
     }
   }
 
-  private static String getString(String regex) {
+  // Returns a string from user input that maches the specified regex
+  private static String getString(String message, String error, String regex) {
     String string;
+    System.out.println(message);
     while (true) {
       if ((string = keyboard.nextLine()).matches(regex)) return string;
-      else System.out.println("Invalid String!");
+      else System.out.println(error);
     }
   }
 
   private static boolean signIn() throws IOException {
-    String name = "";
-    while (name.length()<3){
-      System.out.println("Type your username:");
-      name = getString("[0-9a-zA-Z]{3,20}");
-    }
-    sendData(new String[]{"I", name});
+    sendData(new String[]{"I", getString(usrNameMsg, usrNameErr, usrNameRex)});
     return receiveResponse();
   }
 
   private static boolean signUp() throws IOException {
-    String name = "";
-    while (name.length()<3){
-      System.out.println("Type your username:");
-      name = getString("[0-9a-zA-Z]{3,20}");
-    }
-    sendData(new String[]{"R", name});
+    sendData(new String[]{"R", getString(usrNameMsg, usrNameErr, usrNameRex)});
     return receiveResponse();
   }
 
   private static void sendToClient() throws IOException {
-    System.out.println("Type the recipient username:");
-    String recipient = getString("[0-9a-zA-Z]{3,20}");
-    System.out.println("Type the subject:");
-    String subject = getString("[^:]{1,255}");
-    System.out.println("Type your message:");
-    String message = getString("[^:]{1,3000}");
-    sendData(new String[]{"S", recipient, subject, message});
+    String recipnt = getString(recipntMsg, usrNameErr, usrNameRex);
+    String subject = getString(subjectMsg, subjectErr, subjectRex);
+    String message = getString(messageMsg, messageErr, messageRex);
+    sendData(new String[]{"S", recipnt, subject, message});
     receiveResponse();
   }
 
   private static void sendToGroup() throws IOException {
-    System.out.println("Type the group name:");
-    String group = getString("[0-9a-zA-Z]{3,20}");
-    System.out.println("Type your message:");
-    String message = getString("[^:]{1,3000}");
-    sendData(new String[]{"T", group, "Group " + group, message});
+    String grpname = getString(grpNameMsg, grpNameErr, grpNameRex);
+    String subject = "Group " + grpname;
+    String message = getString(messageMsg, messageErr, messageRex);
+    sendData(new String[]{"T", grpname, subject, message});
     receiveResponse();
   }
 
@@ -99,20 +103,17 @@ public class VSMTPClient {
   }
 
   private static void createGroup() throws IOException {
-    System.out.println("Type the group name:");
-    sendData(new String[]{"G", getString("[0-9a-zA-Z]{2,20}")});
+    sendData(new String[]{"G", getString(grpNameMsg, grpNameErr, grpNameRex)});
     receiveResponse();
   }
 
   private static void joinGroup() throws IOException {
-    System.out.println("Type the group name:");
-    sendData(new String[]{"J", getString("[0-9a-zA-Z]{2,20}")});
+    sendData(new String[]{"J", getString(grpNameMsg, grpNameErr, grpNameRex)});
     receiveResponse();
   }
 
   private static void leaveGroup() throws IOException {
-    System.out.println("Type the group name:");
-    sendData(new String[]{"L", getString("[0-9a-zA-Z]{2,20}")});
+    sendData(new String[]{"L", getString(grpNameMsg, grpNameErr, grpNameRex)});
     receiveResponse();
   }
 
