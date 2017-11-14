@@ -54,20 +54,28 @@ public class VSMTPClient {
   }
 
   private static boolean signIn() throws IOException {
-    System.out.println("Type your username:");
-    sendData(new String[]{"I", getString("[0-9a-zA-Z]{4,20}")});
+    String name = "";
+    while (name.length()<3){
+      System.out.println("Type your username:");
+      name = getString("[0-9a-zA-Z]{3,20}");
+    }
+    sendData(new String[]{"I", name});
     return receiveResponse();
   }
 
   private static boolean signUp() throws IOException {
-    System.out.println("Type your username:");
-    sendData(new String[]{"R", getString("[0-9a-zA-Z]{4,20}")});
+    String name = "";
+    while (name.length()<3){
+      System.out.println("Type your username:");
+      name = getString("[0-9a-zA-Z]{3,20}");
+    }
+    sendData(new String[]{"R", name});
     return receiveResponse();
   }
 
   private static void sendToClient() throws IOException {
     System.out.println("Type the recipient username:");
-    String recipient = getString("[0-9a-zA-Z]{4,20}");
+    String recipient = getString("[0-9a-zA-Z]{3,20}");
     System.out.println("Type the subject:");
     String subject = getString("[^:]{1,255}");
     System.out.println("Type your message:");
@@ -78,7 +86,7 @@ public class VSMTPClient {
 
   private static void sendToGroup() throws IOException {
     System.out.println("Type the group name:");
-    String group = getString("[0-9a-zA-Z]{4,20}");
+    String group = getString("[0-9a-zA-Z]{3,20}");
     System.out.println("Type your message:");
     String message = getString("[^:]{1,3000}");
     sendData(new String[]{"T", group, "Group " + group, message});
