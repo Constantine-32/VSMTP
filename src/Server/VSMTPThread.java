@@ -42,8 +42,8 @@ public class VSMTPThread extends Thread {
   }
 
   private String processRequest(String clientData) {
-    Scanner data = new Scanner(clientData).useDelimiter(":");
-    switch (data.next()) {
+    String[] data = clientData.split(":");
+    switch (data[0]) {
     case "I": return singIn(data);
     case "R": return signUp(data);
     case "S": return sendToClient(data);
@@ -57,15 +57,15 @@ public class VSMTPThread extends Thread {
     }
   }
 
-  private String singIn(Scanner data) {
-    String clientName = data.next();
+  private String singIn(String[] data) {
+    String clientName = data[1];
     client = clientTable.get(clientName);
     if (client == null || !client.isActive()) return "KO:User doesn't exists";
     return "OK:Logged in successfully";
   }
 
-  private String signUp(Scanner data) {
-    String clientName = data.next();
+  private String signUp(String[] data) {
+    String clientName = data[1];
     client = clientTable.get(clientName);
     if (client == null) {
       client = new Client(clientName);
@@ -79,20 +79,20 @@ public class VSMTPThread extends Thread {
     return "KO:Username already exists";
   }
 
-  private String sendToClient(Scanner data) {
-    String recipient = data.next();
-    String subject = data.next();
-    String message = data.next();
+  private String sendToClient(String[] data) {
+    String recipient = data[1];
+    String subject = data[2];
+    String message = data[3];
     if (clientTable.containsKey(recipient)) {
       clientTable.get(recipient).addMessage(new Message(client.getName(), subject, message));
       return "OK:Message sent successfully";
     } else return "KO:Message NOT sent, unknown recipient";
   }
 
-  private String sendToGroup(Scanner data) {
-    String group = data.next();
-    String subject = data.next();
-    String message = data.next();
+  private String sendToGroup(String[] data) {
+    String group = data[1];
+    String subject = data[2];
+    String message = data[3];
     if (!groupTable.containsKey(group)) return "KO:Group doesn't exists";
     if (!groupTable.get(group).hasClient(client.getName())) return "KO:You aren't in this group";
     groupTable.get(group).addMessage(new Message(client.getName(), subject, message));
@@ -110,22 +110,22 @@ public class VSMTPThread extends Thread {
     return sb.toString();
   }
 
-  private String createGroup(Scanner data) {
-    String groupName = data.next();
+  private String createGroup(String[] data) {
+    String groupName = data[1];
     if (groupTable.containsKey(groupName)) return "KO:Group name already exists";
     groupTable.put(groupName, new Group(groupName));
     return "OK:Group created";
   }
 
-  private String joinGroup(Scanner data) {
-    String groupName = data.next();
+  private String joinGroup(String[] data) {
+    String groupName = data[1];
     if (!groupTable.containsKey(groupName)) return "KO:Group doesn't exists";
     groupTable.get(groupName).addClient(client);
     return "OK:Joined the group successfully";
   }
 
-  private String leaveGroup(Scanner data) {
-    String groupName = data.next();
+  private String leaveGroup(String[] data) {
+    String groupName = data[1];
     if (!groupTable.containsKey(groupName)) return "KO:Group doesn't exists";
     if (!groupTable.get(groupName).hasClient(client.getName())) return "KO:You aren't in that group";
     groupTable.get(groupName).removeClient(client);

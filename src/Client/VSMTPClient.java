@@ -118,14 +118,13 @@ public class VSMTPClient {
   }
 
   private static boolean receiveResponse() {
-    Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
-    String result = response.next();
-    if (result.equals("OK")) {
-      System.out.println("Success: " + response.next());
+    String[] response = inFromServer.nextLine().split(":");
+    if (response[0].equals("OK")) {
+      System.out.println("Success: " + response[1]);
       return true;
     }
-    if (result.equals("KO")) {
-      System.out.println("Error: " + response.next());
+    if (response[0].equals("KO")) {
+      System.out.println("Error: " + response[1]);
       return false;
     }
     System.out.println("Unknown Response");
@@ -133,19 +132,14 @@ public class VSMTPClient {
   }
 
   private static void receiveResponseMessages() {
-    Scanner response = new Scanner(inFromServer.nextLine()).useDelimiter(":");
-    String result = response.next();
-    if (result.equals("OK")) {
-      LinkedList<Message> messageList = new LinkedList<>();
-      while (response.hasNext()) {
-        messageList.add(new Message(response.next(), response.next(), response.next()));
+    String[] response = inFromServer.nextLine().split(":");
+    if (response[0].equals("OK")) {
+      int messages = (response.length - 1) / 3;
+      for (int i = 0; i < messages; i++) {
+        System.out.println("Message " + (i+1) + " out of " + messages);
+        System.out.println(new Message(response[(i * 3) + 1], response[(i * 3) + 2], response[(i * 3) + 3]).toString());
       }
-      int count = 1;
-      for (Message message : messageList) {
-        System.out.println("Message " + (count++) + " out of " + messageList.size());
-        System.out.println(message.toString());
-      }
-    } else System.out.println("Error: " + response.next());
+    } else System.out.println("Error: " + response[1]);
   }
 
   public static void main(String[] args) throws Exception {

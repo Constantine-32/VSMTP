@@ -27,7 +27,7 @@ public class Message implements Cloneable {
 
   @Override
   public String toString() {
-    return "From: " + from + "\nSubject: " + subject + "\nMessage: " + text;
+    return "\tFrom: " + from + "\n\tSubject: " + subject + "\n\tMessage: " + text;
   }
 
   @Override
