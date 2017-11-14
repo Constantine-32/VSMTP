@@ -16,7 +16,7 @@ public class VSMTPThread extends Thread {
   private Socket socket;
   private Client client;
 
-  VSMTPThread(Socket socket) {
+  public VSMTPThread(Socket socket) {
     this.socket = socket;
     threadId = nextId++;
     System.out.println("Thread[" + threadId + "] STARTED");
@@ -80,13 +80,12 @@ public class VSMTPThread extends Thread {
   }
 
   private String sendToClient(String[] data) {
-    String recipient = data[1];
+    String recipnt = data[1];
     String subject = data[2];
     String message = data[3];
-    if (clientTable.containsKey(recipient)) {
-      clientTable.get(recipient).addMessage(new Message(client.getName(), subject, message));
-      return "OK:Message sent successfully";
-    } else return "KO:Message NOT sent, unknown recipient";
+    if (!clientTable.containsKey(recipnt)) return "KO:Message NOT sent, unknown recipient";
+    clientTable.get(recipnt).addMessage(new Message(client.getName(), subject, message));
+    return "OK:Message sent successfully";
   }
 
   private String sendToGroup(String[] data) {
