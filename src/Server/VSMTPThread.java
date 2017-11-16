@@ -44,7 +44,7 @@ public class VSMTPThread extends Thread {
   private String processRequest(String clientData) {
     String[] data = clientData.split(":");
     switch (data[0]) {
-    case "I": return singIn(data);
+    case "I": return signIn(data);
     case "R": return signUp(data);
     case "S": return sendToClient(data);
     case "T": return sendToGroup(data);
@@ -57,7 +57,7 @@ public class VSMTPThread extends Thread {
     }
   }
 
-  private String singIn(String[] data) {
+  private String signIn(String[] data) {
     String clientName = data[1];
     client = clientTable.get(clientName);
     if (client == null || !client.isActive()) return "KO:User doesn't exists";
