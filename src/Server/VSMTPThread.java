@@ -10,8 +10,8 @@ public class VSMTPThread extends Thread {
   private static int nextId = 1;
   private int threadId;
 
-  private static Map<String, Client> clientTable = new HashMap<>();
-  private static Map<String, Group> groupTable = new HashMap<>();
+  private static Map<String, Client> clientTable = Collections.synchronizedMap(new HashMap<>());
+  private static Map<String, Group> groupTable = Collections.synchronizedMap(new HashMap<>());
 
   private Socket socket;
   private Client client;

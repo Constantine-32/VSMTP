@@ -136,7 +136,7 @@ public class VSMTPClient {
       System.out.println("Error: " + response[1]);
       return false;
     }
-    System.out.println("Unknown Response");
+    System.out.println("Error: Unknown Response");
     return false;
   }
 
