@@ -155,7 +155,7 @@ public class VSMTPClient {
     boolean exit = false;
     boolean loggedIn = false;
 
-    try (Socket socket = new Socket("localhost", 1234)) {
+    try (Socket socket = new Socket(args[0], Integer.parseInt(args[1]))) {
       outToServer = new DataOutputStream(socket.getOutputStream());
       inFromServer = new Scanner(socket.getInputStream());
 
