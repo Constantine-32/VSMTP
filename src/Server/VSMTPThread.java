@@ -113,6 +113,7 @@ public class VSMTPThread extends Thread {
     String groupName = data[1];
     if (groupTable.containsKey(groupName)) return "KO:Group name already exists";
     groupTable.put(groupName, new Group(groupName));
+    groupTable.get(groupName).addClient(client);
     return "OK:Group created";
   }
 
